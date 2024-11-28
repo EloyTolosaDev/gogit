@@ -1,21 +1,13 @@
 package main
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"io"
-	"io/fs"
 	"log"
 	"os"
 	"runtime"
-	"strings"
 
+	"github.com/EloyTolosaDev/gogit/objects"
 	"github.com/urfave/cli/v2"
-)
-
-const (
-	MAX_RECURSIVE_DEPTH = 100
 )
 
 var CommitCommand = &cli.Command{
@@ -74,121 +66,17 @@ func BeforeCommit(c *cli.Context) error {
 // a tree object is a file with a list of trees and blobs
 // inside the folder with the following information:
 // -- mode, type, name and sha
-func createTreeWithDepth(dirpath string, depth int) error {
-	if depth == MAX_RECURSIVE_DEPTH {
-		return fmt.Errorf("[ERROR] Max recursive depth (%d) reached for func %s", MAX_RECURSIVE_DEPTH, getCurrentFunctionName())
+func createTree(dirpath string) (*objects.Tree, error) {
+	t := objects.NewTree(dirpath)
+	if err := t.Save(); err != nil {
+		return nil, err
 	}
-
-	objects := []fs.DirEntry{}
-	treeBuilder := strings.Builder{}
-
-	entries, err := os.ReadDir(dirpath)
-	if err != nil {
-		return CommitError{err}
-	}
-
-	// for every entry entry, check if its a file or a directory
-	// and create, accordingly, a tree or a blob object
-	for _, entry := range entries {
-		if entry.Name() == ".git" || entry.Name() == ".gogit" {
-			continue
-		}
-
-		entryPath := dirpath + "/" + entry.Name()
-		if entry.IsDir() {
-			createTreeWithDepth(entryPath, depth+1)
-		} else {
-			createBlob(entryPath)
-		}
-		objects = append(objects, entry)
-	}
-
-	for _, entry := range entries {
-		t := "blob"
-		if entry.IsDir() {
-			t = "tree"
-		}
-
-		treeBuilder.WriteString(fmt.Sprintf("%s %s \t%s\n", t, hash, entry.Name()))
-	}
-
-	return nil
-}
-
-// calculates the sha-1 hash from the contents of the file
-// and returns it
-func hash(filepath string) (string, error) {
-
-	file, err := os.Open(filepath)
-	if err != nil {
-		return "", CommitError{err}
-	}
-	defer file.Close()
-	b, err := io.ReadAll(file)
-	if err != nil {
-		return "", CommitError{err}
-	}
-
-	hasher := sha1.New()
-	if _, err := hasher.Write(b); err != nil {
-		return "", CommitError{err}
-	}
-
-	return hex.EncodeToString(hasher.Sum(nil)), nil
-}
-
-// this function reads a file into memory, creates a sha-1 hash,
-// creates the folders to hold it, and compresses it
-func createBlob(entryPath string) error {
-	log.Printf("[DEBUG] Creating blob for file %s\n", entryPath)
-
-	hash, err := hash(entryPath)
-	if err != nil {
-		return CommitError{err}
-	}
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		return CommitError{err}
-	}
-
-	objectsDir := cwd + "/.gogit/objects/"
-	hashDir := objectsDir + hash[:2]
-	if err := os.Mkdir(hashDir, 0755); err != nil {
-		if !os.IsExist(err) {
-			return CommitError{err}
-		}
-	}
-
-	hashFilePath := hashDir + "/" + hash[2:]
-	hashFile, err := os.Create(hashFilePath)
-	if err != nil {
-		if !os.IsExist(err) {
-			return CommitError{err}
-		}
-	}
-
-	if _, err = hashFile.Write(b); err != nil {
-		return CommitError{err}
-	}
-
-	log.Printf("[DEBUG] Successfully created blob for file %s\n", entryPath)
-
-	return nil
+	return t, nil
 }
 
 func getCurrentFunctionName() string {
 	pc, _, _, _ := runtime.Caller(1)
 	return runtime.FuncForPC(pc).Name()
-}
-
-// lists all dir files and creates blobs for every file in the dir
-// if more dirs are found, traverse them
-//
-// NOTE This function is implemented like this to prevent accidental
-// infinite recursive calls and throw an error when that happens
-func createTree(dirpath string) error {
-	return createTreeWithDepth(dirpath, 0)
 }
 
 func Commit(c *cli.Context) error {
@@ -198,5 +86,10 @@ func Commit(c *cli.Context) error {
 		return CommitError{err}
 	}
 
-	return createTree(cwd)
+	_, err = createTree(cwd)
+	if err != nil {
+		return CommitError{err}
+	}
+
+	return nil
 }
