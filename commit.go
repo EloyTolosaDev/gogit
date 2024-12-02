@@ -1,10 +1,7 @@
 package main
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"runtime"
@@ -79,42 +76,8 @@ func createBlob(entryPath string) error {
 	}
 	defer file.Close()
 
-	b, err := io.ReadAll(file)
-	if err != nil {
-		return CommitError{err}
-	}
-
-	hasher := sha1.New()
-	if _, err := hasher.Write(b); err != nil {
-		return CommitError{err}
-	}
-
-	hash := hex.EncodeToString(hasher.Sum(nil))
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		return CommitError{err}
-	}
-
-	objectsDir := cwd + "/.gogit/objects/"
-	hashDir := objectsDir + hash[:2]
-	if err := os.Mkdir(hashDir, 0755); err != nil {
-		if !os.IsExist(err) {
-			return CommitError{err}
-		}
-	}
-
-	hashFilePath := hashDir + "/" + hash[2:]
-	hashFile, err := os.Create(hashFilePath)
-	if err != nil {
-		if !os.IsExist(err) {
-			return CommitError{err}
-		}
-	}
-
-	if _, err = hashFile.Write(b); err != nil {
-		return CommitError{err}
-	}
+	b := NewBlob(file)
+	b.Save()
 
 	log.Printf("[DEBUG] Successfully created blob for file %s\n", entryPath)
 
