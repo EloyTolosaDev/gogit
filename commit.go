@@ -62,18 +62,6 @@ func BeforeCommit(c *cli.Context) error {
 	return nil
 }
 
-// this function creates a tree object from a directory
-// a tree object is a file with a list of trees and blobs
-// inside the folder with the following information:
-// -- mode, type, name and sha
-func createTree(dirpath string) (*objects.Tree, error) {
-	t := objects.NewTree(dirpath)
-	if err := t.Save(); err != nil {
-		return nil, err
-	}
-	return t, nil
-}
-
 func getCurrentFunctionName() string {
 	pc, _, _, _ := runtime.Caller(1)
 	return runtime.FuncForPC(pc).Name()
@@ -86,10 +74,8 @@ func Commit(c *cli.Context) error {
 		return CommitError{err}
 	}
 
-	_, err = createTree(cwd)
-	if err != nil {
-		return CommitError{err}
-	}
+	t := NewTree(cwd)
+	t.Save()
 
 	return nil
 }
