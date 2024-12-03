@@ -4,19 +4,40 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 type Blob struct {
-	contents io.Reader
-	hash     string
+	sourcePath string
+	contents   io.Reader
+	hash       string
 }
 
-func NewBlob(reader io.Reader) *Blob {
+func (b *Blob) Hash() string {
+	return b.hash
+}
 
-	b, err := io.ReadAll(reader)
+func (b *Blob) Info() string {
+	return fmt.Sprintf("Blob %s \t%s\n", b.Hash(), b.Name())
+}
+
+func (b *Blob) Name() string {
+	parts := strings.Split(b.sourcePath, "/")
+	return parts[len(parts)-1]
+}
+
+func NewBlob(filepath string) *Blob {
+	file, err := os.Open(filepath)
+	if err != nil {
+		return nil
+	}
+	defer file.Close()
+
+	b, err := io.ReadAll(file)
 	if err != nil {
 		log.Fatalf("[FATAL] [NewBlob] Error creating blob: %s\n", err)
 	}
@@ -28,8 +49,9 @@ func NewBlob(reader io.Reader) *Blob {
 	}
 
 	return &Blob{
-		hash:     hex.EncodeToString(hasher.Sum(nil)),
-		contents: bytes.NewBuffer(b),
+		sourcePath: filepath,
+		hash:       hex.EncodeToString(hasher.Sum(nil)),
+		contents:   bytes.NewBuffer(b),
 	}
 
 }
