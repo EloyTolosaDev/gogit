@@ -6,6 +6,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/EloyTolosaDev/gogit/objects"
 	"github.com/urfave/cli/v2"
 )
 
