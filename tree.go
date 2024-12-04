@@ -67,12 +67,10 @@ func newTreeRecursive(dirpath string, depth int) *Tree {
 			newDirPath := dirpath + "/" + e.Name()
 			o = newTreeRecursive(newDirPath, depth+1)
 		} else {
-
 			filePath := dirpath + "/" + e.Name()
 			b := NewBlob(filePath)
 			b.Save()
 			o = b
-
 		}
 
 		objs = append(objs, o)

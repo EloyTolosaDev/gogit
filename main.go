@@ -9,6 +9,7 @@ import (
 
 var Commands = []*cli.Command{
 	CommitCommand,
+	InitCommand,
 }
 
 var DefaultAction = func(c *cli.Context) error {
