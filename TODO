@@ -1,0 +1,11 @@
+# general todo list
+* [ ] git config
+* [ ] create commit object and manage HEAD file
+* [ ] create branching functionality
+* [ ] creating tag functionality
+* [ ] git push
+* [ ] git clone
+
+# misc
+* [ ] compress git files
+* [ ] git cat-file functionality 
