@@ -1,4 +1,5 @@
 # general todo list
+* [ ] write serialized objects in the file, manually created strings which will make it all a lot easier
 * [ ] git config
 * [ ] create commit object and manage HEAD file
 * [ ] create branching functionality

@@ -1,4 +1,4 @@
-package main
+package object
 
 type Object interface {
 	Hash() string
