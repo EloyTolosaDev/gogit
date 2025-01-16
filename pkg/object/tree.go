@@ -1,4 +1,4 @@
-package main
+package object
 
 import (
 	"bytes"
@@ -41,7 +41,7 @@ func NewTree(dirpath string) *Tree {
 
 func newTreeRecursive(dirpath string, depth int) *Tree {
 	if depth == MAX_RECURSIVE_DEPTH {
-		log.Fatalf("[ERROR] Max recursive depth (%d) reached for func %s", MAX_RECURSIVE_DEPTH, getCurrentFunctionName())
+		// NOTE log something
 		return nil
 	}
 

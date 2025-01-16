@@ -1,9 +1,10 @@
-package main
+package command
 
 import (
 	"fmt"
 	"os"
-	"runtime"
+
+	"github.com/EloyTolosaDev/gogit/pkg/object"
 
 	"github.com/urfave/cli/v2"
 )
@@ -28,11 +29,6 @@ func (e CommitError) Error() string {
 	return fmt.Sprintf("[ERROR] Error in commit: %s\n", e.err.Error())
 }
 
-func getCurrentFunctionName() string {
-	pc, _, _, _ := runtime.Caller(1)
-	return runtime.FuncForPC(pc).Name()
-}
-
 func Commit(c *cli.Context) error {
 
 	cwd, err := os.Getwd()
@@ -40,7 +36,7 @@ func Commit(c *cli.Context) error {
 		return CommitError{err}
 	}
 
-	t := NewTree(cwd)
+	t := object.NewTree(cwd)
 	t.Save()
 
 	return nil

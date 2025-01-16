@@ -1,7 +1,6 @@
-package main
+package command
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -23,14 +22,6 @@ var ConfigCommand = &cli.Command{
 		},
 	},
 	Action: Config,
-}
-
-type ConfigError struct {
-	err error
-}
-
-func (ce ConfigError) Error() string {
-	return fmt.Sprintf("[ERROR] Error in Config command: %s", ce.err)
 }
 
 func Config(c *cli.Context) error {

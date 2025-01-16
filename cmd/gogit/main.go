@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/EloyTolosaDev/gogit/pkg/command"
+
 	"github.com/urfave/cli/v2"
 )
 
 var Commands = []*cli.Command{
-	CommitCommand,
-	InitCommand,
-	ConfigCommand,
+	command.ConfigCommand,
+	command.InitCommand,
+	command.CommitCommand,
 }
 
 var DefaultAction = func(c *cli.Context) error {

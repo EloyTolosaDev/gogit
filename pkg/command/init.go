@@ -1,21 +1,16 @@
-package main
+package command
 
 import (
 	"log"
 	"os"
 
+	"github.com/EloyTolosaDev/gogit/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
 
 var InitCommand = &cli.Command{
-	Name:  "init",
-	Usage: "Initialize gogit repository (create necessary files and folders)",
-	// Flags: []cli.Flag{
-	// 	&cli.StringFlag{
-	// 		Name:    "message",
-	// 		Aliases: []string{"m"},
-	// 	},
-	// },
+	Name:   "init",
+	Usage:  "Initialize gogit repository (create necessary files and folders)",
 	Action: Init,
 }
 
@@ -24,7 +19,7 @@ func Init(c *cli.Context) error {
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		return CommitError{err}
+		return errors.InitError{}
 	}
 
 	mainDir := ".gogit"
@@ -35,7 +30,7 @@ func Init(c *cli.Context) error {
 	cwd = cwd + "/" + mainDir
 	if err := os.Mkdir(cwd, 0755); err != nil {
 		if !os.IsExist(err) {
-			return CommitError{err}
+			return errors.InitError{}
 		} else {
 			log.Printf("[DEBUG] Dir %s already exists\n", cwd)
 		}
@@ -45,7 +40,7 @@ func Init(c *cli.Context) error {
 		dirname := cwd + "/" + dir
 		if err := os.Mkdir(dirname, 0755); err != nil {
 			if !os.IsExist(err) {
-				return CommitError{err}
+				return errors.InitError{}
 			} else {
 				log.Printf("[DEBUG] Dir %s already exists\n", dirname)
 			}
@@ -56,7 +51,7 @@ func Init(c *cli.Context) error {
 		filename := cwd + "/" + file
 		if _, err := os.Create(filename); err != nil {
 			if !os.IsExist(err) {
-				return CommitError{err}
+				return errors.InitError{}
 			} else {
 				log.Printf("[DEBUG] file %s already exists\n", filename)
 			}
